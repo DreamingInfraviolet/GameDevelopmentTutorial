@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Ball extends Sprite
 {
-	private static final int speed = 600;
+	private static final int speed = 400;
 
 	public Ball(int x, int y)
 	{

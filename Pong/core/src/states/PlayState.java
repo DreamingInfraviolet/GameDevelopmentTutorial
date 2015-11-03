@@ -17,7 +17,7 @@ public class PlayState extends State
 	private Ball ball;
 	private Player player;
 	private Enemy enemy;
-	private Texture background, win, lose;
+	private Texture background;
 	private static boolean victory = false;
 	private static boolean inPlay = true;
 
@@ -28,10 +28,8 @@ public class PlayState extends State
 		player = new Player(Pong.WIDTH-50, (Pong.HEIGHT/2)-38);
 		enemy = new Enemy(50, (Pong.HEIGHT/2)-38);
 		background = new Texture("bg.png");
-		win = new Texture("win.png");
-		lose = new Texture("lose.png");
 	}
-	
+
 	private void spawnBall()
 	{
 		if(ball!=null)
@@ -49,9 +47,10 @@ public class PlayState extends State
 		else
 			player.setVVelocity(0, dt);
 
-		if(!inPlay && Gdx.input.justTouched())
+		if(!inPlay)
 		{
-			gsm.push(new MenuState(gsm));
+			gsm.pop();
+			gsm.push(new EndState(gsm, victory));
 			dispose();
 			inPlay = true;
 			victory = false;
@@ -63,7 +62,7 @@ public class PlayState extends State
 	private void handleBall()
 	{
 		Sprite.Corner corner = ball.getCollisionCorner();
-		
+
 		if(corner!=Sprite.Corner.NONE)
 		{
 			if(corner == Sprite.Corner.LEFT)
@@ -81,7 +80,7 @@ public class PlayState extends State
 			else if (corner == Sprite.Corner.BOTTOM)
 				ball.bounceBot();
 		}
-		
+
 		if(ball.getBounds().overlaps(player.getBounds()))
 		{
 			ball.bounceRight();
@@ -92,7 +91,7 @@ public class PlayState extends State
 		}
 
 	}
-	
+
 	public void handlePaddle(Paddle paddle)
 	{
 		Sprite.Corner corner = paddle.getCollisionCorner();
@@ -106,14 +105,12 @@ public class PlayState extends State
 				assert(false);	
 		}
 	}
-	
+
 	@Override
 	public void update(float dt) 
 	{
 		handleInput(dt);
 		handleBall();
-
-
 
 		if(player.getScore() == 5 || enemy.getScore() == 5)
 		{
@@ -127,10 +124,11 @@ public class PlayState extends State
 				inPlay = false;
 			}
 		}
-		player.update(dt);
-		enemy.update(dt, ball);//, ball);
-		ball.update(dt);
 		
+		player.update(dt);
+		enemy.update(dt, ball);
+		ball.update(dt);
+
 		handlePaddle(player);
 		handlePaddle(enemy);
 	}
@@ -140,23 +138,9 @@ public class PlayState extends State
 	{
 		sb.begin();
 		sb.draw(background, 0, 0, Pong.WIDTH, Pong.HEIGHT);
-		if(inPlay)
-		{
-			sb.draw(ball.getTexture(), ball.getPosition().x, ball.getPosition().y);
-			sb.draw(player.getTexture(), player.getPosition().x, player.getPosition().y);
-			sb.draw(enemy.getTexture(), enemy.getPosition().x, enemy.getPosition().y);
-		}
-		else
-		{
-			if(victory)
-			{
-				sb.draw(win, (Pong.WIDTH/2) - (win.getWidth()/2) , (Pong.HEIGHT/2) - (win.getHeight()/2));
-			}
-			else
-			{
-				sb.draw(lose, (Pong.WIDTH/2) - (lose.getWidth()/2) , (Pong.HEIGHT/2) - (lose.getHeight()/2));
-			}
-		}
+		sb.draw(ball.getTexture(), ball.getPosition().x, ball.getPosition().y);
+		sb.draw(player.getTexture(), player.getPosition().x, player.getPosition().y);
+		sb.draw(enemy.getTexture(), enemy.getPosition().x, enemy.getPosition().y);
 		sb.end();
 	}
 
@@ -164,5 +148,8 @@ public class PlayState extends State
 	public void dispose() 
 	{
 		background.dispose();
+		ball.dispose();
+		player.dispose();
+		enemy.dispose();
 	}
 }
